@@ -14,12 +14,15 @@ def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
         sol (ndarray): an (18 x N) array containing the xyz coordinates
             for the 3 bodies over a timespan {t_0, ..., t_N}
         title (string): the title for plot
-        show_quivers (bool): an optional parameter (default=True) for whether or not to plot the acceleration vector field at t_N
+        show_quivers (bool): an optional parameter (default=False) for whether or not to plot the acceleration vector field at t_N
         show_speed (int): show the initial and final speed of the 3rd body (useful for evaluating slingshot effects)
     """
 
     if ax == None:
         fig, ax = plt.subplots()
+        show_plot = True
+    else:
+        show_plot = False
 
     # First body
     first = ax.plot(sol[0, :], sol[1, :], color='steelblue', label='First Body')
@@ -53,7 +56,7 @@ def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
     ax.legend(loc="upper right", fontsize=12)
     ax.set_xlim(-4, 4)
     ax.set_ylim(-4, 4)
-    if ax == None:
+    if show_plot:
         plt.show()
 
 def get_acc_quivers(sol, grid_size=25):
