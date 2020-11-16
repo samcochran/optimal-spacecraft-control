@@ -7,14 +7,15 @@ from mpl_toolkits.mplot3d import Axes3D
 #import project code
 from simulation import quiver_acceleration
 
-def plot_solution(sol, title, show_quivers=True):
+def plot_solution(sol, title, show_quivers=True, show_speed=True):
     """ Plots in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
     
     Inputs:
-        sol (ndarray): an (18 x N) array (but only the first 9 columns are needed) containing the xyz coordinates
+        sol (ndarray): an (18 x N) array containing the xyz coordinates
             for the 3 bodies over a timespan {t_0, ..., t_N}
         title (string): the title for plot
         show_quivers (bool): an optional parameter (default=True) for whether or not to plot the acceleration vector field at t_N
+        show_speed (int): show the initial and final speed of the 3rd body (useful for evaluating slingshot effects)
     """
     
     fig, ax = plt.subplots()
@@ -35,11 +36,20 @@ def plot_solution(sol, title, show_quivers=True):
     if show_quivers:
         u3x, u3y, a_x, a_y = get_acc_quivers(sol)
         ax.quiver(u3x, u3y, a_x[-1], a_y[-1], label='Acceleration field')
+        
+    #speed text for satellite
+    if show_speed:
+        v0 = float(np.linalg.norm(sol[15:, 0]))
+        vf = float(np.linalg.norm(sol[15:,-1]))
+        vtext = "3rd body speed\n$v_0 = {:.4f}$\n$v_f = {:.4f}$".format(v0, vf)
+        props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
+        ax.text(0.05, 0.17, vtext, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
 
     # Set plot parameters and labels
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
-    ax.legend(fontsize=12)
+    ax.legend(loc="upper right", fontsize=12)
     ax.set_xlim(-4, 4)
     ax.set_ylim(-4, 4)
     plt.show()
@@ -62,7 +72,7 @@ def get_acc_quivers(sol, grid_size=25):
     a_x, a_y = quiver_acceleration(sol[:7], u3) #sol[:7] == u12
     return u3x, u3y, a_x, a_y
     
-def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=True):
+def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=True, show_speed=True):
     """ Animates in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
     
     Inputs:
@@ -95,6 +105,14 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
     if show_quivers:
         quiver = ax.quiver(u3x, u3y, a_x[0,:,:], a_y[0,:,:], alpha=0.5, label='Acceleration field')
         
+    #speed text for satellite
+    if show_speed:
+        v0 = float(np.linalg.norm(sol[15:, 0]))
+        vtext = "3rd body speed\n$v_0 = {:.4f}$\n$v_n = {:.4f}$".format(v0, v0)
+        props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
+        speed_text = ax.text(0.05, 0.17, vtext, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
+        
     # Set plot parameters and labels
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
@@ -119,9 +137,12 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
         
         if show_quivers:
             quiver.set_UVC(a_x[j], a_y[j])
-            return first, first_pt, second, second_pt, third, third_pt, quiver
-        else:
-            return first, first_pt, second, second_pt, third, third_pt
+        if show_speed:
+            vn = float(np.linalg.norm(sol[15:, j]))
+            vtext = "3rd body speed\n$v_0 = {:.4f}$\n$v_n = {:.4f}$".format(v0, vn)
+            speed_text.set_text(vtext)
+            
+        return first, first_pt, second, second_pt, third, third_pt, quiver, speed_text
     
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}.mp4".format(filename))
