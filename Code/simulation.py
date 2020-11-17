@@ -72,4 +72,79 @@ def simulate_mechanics(ic, t_span, t_eval, mass_ratio=1):
     
     # Return the solution
     return sol.y
+
+def gravity_acceleration_general(x, m):
+    """
+    
+    Parameters:
+        x (ndarray, length 6*n) xyz coordinates of 3 bodies (first 3*n entries), followed by their velocities (last 3*n entries)
+        m (iterable, length n) masses of bodies.
+        
+    Returns:
+        a (ndarray, length 6*n) derivative of x (velocities, followed by acceleration)
+    """
+    assert len(x)%6 == 0 
+    n = len(x) // 6
+    
+    # Extract velocities
+    v = x[3*n:]
+    
+    # Extract positions
+    x = [ x[3*i:3*(i+1)] for i in range(n) ] 
+
+    # Construct acceleration due to gravity
+    a = np.concatenate(tuple([sum( m[j] * (x[j] - x[i])/np.power(np.sum((x[j]-x[i])**2), 1.5) for j in range(n) if j != i) for i in range(n)]))
+    
+    # Return the result
+    return np.concatenate((v,a))
+
+def simulate_mechanics_general(ic, t_span, t_eval, m):
+    """
+    Uses solve_ivp to simulate the time evolution of the system with given 
+    initial conditions under gravity.
+    
+    Parameters:
+        ic (ndarray, (6*n,)): initial conditions 
+        t_span (tuple, 2): start and end of time interval 
+        t_eval (ndarray): evaluation times for solution
+        m (iterable): list of masses
+        
+    Returns:
+        sol (ndarray, (6*n, L)): an array where each column is the state of the 
+            system at the given time step
+    """
+    # Construct a function for use in solve_ivp
+    f = lambda t, y: gravity_acceleration_general(y, m=m)
+    
+    # Numerically simulate
+    sol = solve_ivp(fun=f, t_span=t_span, y0=ic, t_eval=t_eval)
+    
+    # Return the solution
+    return sol.y
+
+def massless_energy(ic, m):
+    """
+    Returns an array representing the massless energy of the ith body. 
+    """
+    n = len(ic)//6
+    
+    # Extract positions and velocities
+    x = np.array([ ic[3*i:3*(i+1)] for i in range(n) ])
+    v = np.array([ ic[3*(n+i):3*(n+i+1)] for i in range(n) ])
+    print(x)
+    print(v)
+    
+    # Get potential and kinetic energies
+    k = 0.5*np.sum(v**2, axis=1)
+    print(k)
+    p = -0.5*np.array([sum( m[j]/np.sqrt(np.sum((x[i]-x[j])**2)) for j in range(n) if j != i) for i in range(n)])
+    print(p)
+    
+    return k + p 
+
+def total_energy(ic, m): return np.array(m) * massless_energy(ic)
+    
+    
+
+
     
