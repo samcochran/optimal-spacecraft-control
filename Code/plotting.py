@@ -1,11 +1,15 @@
 # Import packages
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import style, rcParams
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
 #import project code
 from simulation import quiver_acceleration
+
+style.use('seaborn')
+rcParams['figure.figsize'] = 10, 10
 
 def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
     """ Plots in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
@@ -140,14 +144,18 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
         second_pt.set_data(sol[3, j], sol[4, j])
         third_pt.set_data(sol[6, j], sol[7, j])
 
+        returning = [first, first_pt, second, second_pt, third, third_pt]
+        
         if show_quivers:
             quiver.set_UVC(a_x[j], a_y[j])
+            returning.append(quiver)
         if show_speed:
             vn = float(np.linalg.norm(sol[15:, j]))
             vtext = "3rd body speed\n$v_0 = {:.4f}$\n$v_n = {:.4f}$".format(v0, vn)
             speed_text.set_text(vtext)
-
-        return first, first_pt, second, second_pt, third, third_pt, quiver, speed_text
+            returning.append(speed_text)
+    
+        return tuple(returning)
 
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}.mp4".format(filename))
