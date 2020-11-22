@@ -58,8 +58,8 @@ def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
     ax.legend(loc="upper right", fontsize=12)
-    ax.set_xlim(-4, 4)
-    ax.set_ylim(-4, 4)
+    ax.set_xlim(-5, 5)
+    ax.set_ylim(-5, 5)
     if show_plot:
         plt.show()
 
@@ -81,7 +81,7 @@ def get_acc_quivers(sol, grid_size=25):
     a_x, a_y = quiver_acceleration(sol[:7], u3) #sol[:7] == u12
     return u3x, u3y, a_x, a_y
 
-def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=True, show_speed=True):
+def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=True, show_speed=True, ax=None):
     """ Animates in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -95,19 +95,24 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
         show_quivers (bool): an optional parameter (default=True) for whether or not to include the acceleration vector field
             in the animation
     """
-    fig, ax = plt.subplots()
+    if ax == None:
+        fig, ax = plt.subplots()
+        show_plot = True
+    else:
+        show_plot = False
+        fig = plt.gcf()
 
     u3x, u3y, a_x, a_y = get_acc_quivers(sol)
 
-    first, = ax.plot([], [], color='steelblue', ls='--', label='First Body')
+    first, = ax.plot([], [], color='steelblue', ls=':', label='First Body')
     first_pt, = ax.plot(sol[0, 0], sol[1, 0], color='steelblue', marker='o')
 
     # Second body
-    second, = ax.plot([], [], color='seagreen', ls='--', label='Second Body')
+    second, = ax.plot([], [], color='seagreen', ls=':', label='Second Body')
     second_pt, = ax.plot(sol[3, 0], sol[4, 0], color='seagreen', marker='o')
 
     # Third body
-    third, = ax.plot([], [], color='indigo', ls='--', label='Third Body')
+    third, = ax.plot([], [], color='indigo', ls=':', label='Third Body')
     third_pt, = ax.plot(sol[6, 0], sol[7, 0], color='indigo', marker='o')
 
     #vector field
@@ -122,12 +127,13 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
         speed_text = ax.text(0.05, 0.17, vtext, transform=ax.transAxes, fontsize=11,
             verticalalignment='top', bbox=props)
 
-    # Set plot parameters and labels
+    if show_plot:
+        # Set plot parameters and labels
+        ax.set_xlim(-4, 4)
+        ax.set_ylim(-4, 4)
+    ax.legend(loc="upper right", fontsize=12, bbox_to_anchor=(1, 0.5))
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
-    ax.legend(loc="upper right", fontsize=12, bbox_to_anchor=(1, 0.5))
-    ax.set_xlim(-4, 4)
-    ax.set_ylim(-4, 4)
 
     #limit animation frames
     N = sol.shape[1]
@@ -145,7 +151,7 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
         third_pt.set_data(sol[6, j], sol[7, j])
 
         returning = [first, first_pt, second, second_pt, third, third_pt]
-        
+
         if show_quivers:
             quiver.set_UVC(a_x[j], a_y[j])
             returning.append(quiver)
@@ -154,12 +160,13 @@ def animate_solution(sol, title, filename, skip=1, interval=30., show_quivers=Tr
             vtext = "3rd body speed\n$v_0 = {:.4f}$\n$v_n = {:.4f}$".format(v0, vn)
             speed_text.set_text(vtext)
             returning.append(speed_text)
-    
+
         return tuple(returning)
 
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}.mp4".format(filename))
-    plt.show()
+    if show_plot:
+        plt.show()
 
 def plot_sol3d(sol, title):
     """ Plots in 3d a solution to the 3-body problem.
