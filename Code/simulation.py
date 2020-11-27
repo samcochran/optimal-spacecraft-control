@@ -142,9 +142,80 @@ def massless_energy(ic, m):
     
     return k + p 
 
-def total_energy(ic, m): return np.array(m) * massless_energy(ic)
+def total_energy(ic, m): 
+    return np.array(m) * massless_energy(ic)
     
+def to_rotational(sol, m1=1, m2=1, x_align=True):
+    """Converts the xyz positions and velocities of 3 bodies into rotational coordinates. We do this by calculating the center
+    of mass of the system and the angular velocity of the Kepler solution to the 2-body problem, then use these values to
+    create a rotating coordinate system. We assume the xyz coordinates have already been rescaled so that we don't need G
     
+    Assumptions:
+        the mass of the third body is zero
+        the first two bodies lie in the xy plane
+        the velocity of the center of mass is zero (otherwise we need to subtract its velocity to get the correct velocities)
+    Inputs:
+        sol (ndarray) size (18, N): matrix containing the xyz positions and velocites of the 3 bodies over {t_0, ..., t_N}
+        
+        (optional inputs)
+        m1 (float): the mass of the first body
+        m2 (float): the mass of the second body
+        x_align (bool): whether or not to realign m1 and m2 to be on the x-axis (default: True)
+        
+    Returns:
+        rot_sol (ndarray) size (18, N): the solution in the rotating coordinate system with
+        center (ndarray) size (3,): the xyz coordinates of the center of mass of the system with
+    """
+    #See Caleb.ipynb for a short LaTeX discussion on why this works
+    
+    center = (m1*sol[:3,0] + m2*sol[3:6, 0]).reshape(3,1)
+    
+    rot_sol = np.empty_like(sol)
+    
+    #Adjust the positions by the center of mass
+    rot_sol[:3, :] = (sol[:3, 0:1] - center)
+    rot_sol[3:6, :] = (sol[3:6, 0:1] - center)
+    rot_sol[6:9, :] = sol[6:9, :] - center
+    
+    if x_align:
+        theta0 = np.arctan2(rot_sol[1,0], rot_sol[0,0])
+        
+        #use 'rotation matrix' to re-align body 1 to the x axis
+        cos0 = np.cos(theta0)
+        sin0 = np.sin(theta0)
+        temp = rot_sol[:9, :].copy()
+        
+        for i in range(3):
+            x = 3*i
+            y = x+1
+            rot_sol[x, :] = cos0*temp[x, :] + sin0*temp[y, :]
+            rot_sol[y, :] = -sin0*temp[x, :] + cos0*temp[y, :]
+    
+    #Construct rotation matrix elements
+    thetas = np.arctan2(sol[1,:], sol[0, :])
+    dthetas = thetas[1:] - thetas[0]
+    cos = np.cos(dthetas)
+    sin = np.sin(dthetas)
+    temp = rot_sol[6:9, :].copy()
+    
+    #equivalent to multiplying by a rotation matrix
+    rot_sol[6:9, 0] = temp[:, 0]
+    rot_sol[6, 1:] = cos*temp[0, 1:] + sin*temp[1, 1:]
+    rot_sol[7, 1:] = -sin*temp[0, 1:] + cos*temp[1, 1:]
+    rot_sol[8, 1:] = temp[2, 1:]
+    
+    #We can rotate the velocities in the same way we rotated position
+    #because we are rotating around the origin (center of mass)
+    rot_sol[9:12, :] = 0
+    rot_sol[12:15, :] = 0
+    
+    #equivalent to multiplying by a rotation matrix
+    rot_sol[15:16, 0] = sol[15:16, 0] 
+    rot_sol[15, 1:] = cos*sol[15, 1:] + sin*sol[16, 1:]
+    rot_sol[16, 1:] = -sin*sol[15, 1:] + cos*sol[16, 1:]
+    rot_sol[-1, :] = sol[-1, :]
+    
+    return rot_sol, center    
 
 
     
