@@ -11,7 +11,7 @@ from simulation import quiver_acceleration
 style.use('seaborn')
 rcParams['figure.figsize'] = 10, 10
 
-def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
+def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None, xlim=(-5,5), ylim=(-5,5)):
     """ Plots in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -42,7 +42,7 @@ def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
 
     #quivers
     if show_quivers:
-        u3x, u3y, a_x, a_y = get_acc_quivers(sol)
+        u3x, u3y, a_x, a_y = get_acc_quivers(sol, xlim, ylim)
         ax.quiver(u3x, u3y, a_x[-1], a_y[-1], label='Acceleration field')
 
     #speed text for satellite
@@ -58,12 +58,12 @@ def plot_solution(sol, title, show_quivers=False, show_speed=True, ax=None):
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
     ax.legend(loc="upper right", fontsize=12)
-    ax.set_xlim(-5, 5)
-    ax.set_ylim(-5, 5)
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
     if show_plot:
         plt.show()
 
-def get_acc_quivers(sol, grid_size=25):
+def get_acc_quivers(sol, xlim, ylim, grid_size=25):
     """Get acceleration vector field on the 3rd body given the current solution (only using the posiitions of the 1st and
     2nd body) over time. For the specs below, N is the grid_size parameter and T is the number of time values in sol
 
@@ -76,7 +76,7 @@ def get_acc_quivers(sol, grid_size=25):
         a_x (ndarray (T, N, N)): the x acceleration at each point of the grid for all time
         a_y (ndarray (T, N, N)): the y acceleration at each point of the grid for all time
     """
-    u3x, u3y = np.meshgrid(np.linspace(-4,4,grid_size), np.linspace(-4,4,grid_size)) #(N,N)
+    u3x, u3y = np.meshgrid(np.linspace(*xlim,grid_size), np.linspace(*ylim,grid_size)) #(N,N)
     u3 = np.stack((u3x, u3y), axis=0) #(2,N,N)
     a_x, a_y = quiver_acceleration(sol[:7], u3) #sol[:7] == u12
     return u3x, u3y, a_x, a_y
@@ -136,7 +136,7 @@ def animate_solution(sols, title, filename, skip=40, interval=30., xlim=(-5,5), 
 
     #vector field
     if show_quivers:
-        u3x, u3y, a_x, a_y = get_acc_quivers(sol)
+        u3x, u3y, a_x, a_y = get_acc_quivers(sol, xlim, ylim)
         quiver = ax.quiver(u3x, u3y, a_x[0,:,:], a_y[0,:,:], alpha=0.5, label='Acceleration field')
 
     #speed text for satellite
