@@ -27,7 +27,7 @@ def gravity_acceleration(t, x, m1=1, m2=1):
     # Return the result
     return np.concatenate((v,a))
     
-def quiver_acceleration(u12, u3, m1=1, m2=2):
+def quiver_acceleration(u12, u3, m1=1, m2=1):
     """This is similar to the method above except it specializes in calculating an acceleration vector field for the 3rd mass
     in the system where the positions of the 1st and 2nd mass have been precalculated and we investigate the acceleration 
     experienced by potential 3rd masses at all positions in a grid. We also assume that z=0 for everything in the system.
@@ -44,8 +44,8 @@ def quiver_acceleration(u12, u3, m1=1, m2=2):
     u2 = u12[4:6, :].reshape(2, -1, 1, 1) # (2,T,1,1)
     d, N, _N = u3.shape #using d to make it easier to generalize to include z-coord
     u3 = u3.reshape(d, 1, N, N) #(2, 1, N, N)
-    sqdist13 = np.sum(np.square(u3-u1)) # (2,1,N,N) - (2,T,1,1) = (2,T,N,N) using array broadcasting
-    sqdist23 = np.sum(np.square(u3-u2)) # (2,1,N,N) - (2,T,1,1) = (2,T,N,N)
+    sqdist13 = np.sum(np.square(u3-u1), axis=0) # (2,1,N,N) - (2,T,1,1) = (2,T,N,N) using array broadcasting
+    sqdist23 = np.sum(np.square(u3-u2), axis=0) # (2,1,N,N) - (2,T,1,1) = (2,T,N,N)
     a = m2*(u2-u3)/np.power(sqdist23, 1.5) + m1*(u1-u3)/np.power(sqdist13, 1.5) #(2,T,N,N)
     return a
     
