@@ -131,19 +131,20 @@ def massless_energy(ic, m):
     # Extract positions and velocities
     x = np.array([ ic[3*i:3*(i+1)] for i in range(n) ])
     v = np.array([ ic[3*(n+i):3*(n+i+1)] for i in range(n) ])
-    print(x)
-    print(v)
+    #print(x)
+    #print(v)
     
     # Get potential and kinetic energies
+    #print(x.shape, v.shape) (3,3,N)
     k = 0.5*np.sum(v**2, axis=1)
-    print(k)
-    p = -0.5*np.array([sum( m[j]/np.sqrt(np.sum((x[i]-x[j])**2)) for j in range(n) if j != i) for i in range(n)])
-    print(p)
+    #print(k)
+    p = -0.5*np.array([sum( m[j]/np.sqrt(np.sum((x[i]-x[j])**2, axis=0)) for j in range(n) if j != i) for i in range(n)])
+    #print(p)
     
     return k + p 
 
 def total_energy(ic, m): 
-    return np.array(m) * massless_energy(ic)
+    return np.array(m) * massless_energy(ic, m)
     
 def to_rotational(sol, m1=1, m2=1, x_align=True):
     """Converts the xyz positions and velocities of 3 bodies into rotational coordinates. We do this by calculating the center
@@ -163,8 +164,8 @@ def to_rotational(sol, m1=1, m2=1, x_align=True):
         x_align (bool): whether or not to realign m1 and m2 to be on the x-axis (default: True)
         
     Returns:
-        rot_sol (ndarray) size (18, N): the solution in the rotating coordinate system with
-        center (ndarray) size (3,): the xyz coordinates of the center of mass of the system with
+        rot_sol (ndarray) size (18, N): the solution in the rotating coordinate system
+        center (ndarray) size (3,): the xyz coordinates of the center of mass of the system
     """
     #See Caleb.ipynb for a short LaTeX discussion on why this works
     
