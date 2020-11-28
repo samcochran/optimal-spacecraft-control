@@ -406,7 +406,7 @@ def plot_sol3d(sol, title, lim=(-5,5)):
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
     plt.show()
     
-def plot_nbody3d(sol, title, lim=(-5,5), colors=None):
+def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
     """ Plots in 3d a solution to the n-body problem.
 
     Inputs:
@@ -416,6 +416,9 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None):
         lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or 
             a 6-entry tuple (xmin, xmax, ymin, ymax, zmin, zmax) setting different limits for each axis
         colors (list): an optional list of colors to plot each body in.
+        energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
+            Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
+            Default: None, no text will be displayed.
     """
     n = len(sol)//6
     
@@ -431,6 +434,16 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None):
             color = colors[i % len(colors)]
             ax.plot(sol[j, :], sol[j+1, :], sol[j+2, :], color=color, label=f'Body {i+1}')
             ax.plot(sol[j, -1], sol[j+1, -1], sol[j+2, -1], color=color, marker='o')
+        
+    #energy text
+    if energies is not None:
+        props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
+        vtext = ""
+        for i, energy in enumerate(energies):
+            vtext += "$\Delta E_{} = {:.4f}$\n".format(i+1, energy[-1]-energy[0])
+        vtext = vtext[:-1]
+        ax.text2D(0.05, 0.95, vtext, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
         
     ax.set_title(title, fontsize=16)
     ax.legend(fontsize=12)
@@ -530,7 +543,7 @@ def animate_sol3d(sol, title, filename, skip=40, interval=30, lim=(-5,5)):
     ani.save("../Animations/{}_3d.mp4".format(filename))
     plt.show()
 
-def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colors=None):
+def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colors=None, energies=None):
     """ Animates in 3d a solution to the n-body problem.
 
     Inputs:
@@ -544,6 +557,9 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
         lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or 
             a 6-entry tuple (xmin, xmax, ymin, ymax, zmin, zmax) setting different limits for each axis
         colors (list): an optional list of colors to plot each body in.
+        energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
+            Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
+            Default: None, no text will be displayed.
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -579,6 +595,16 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
     else:
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
 
+    #energy text
+    if energies is not None:
+        props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
+        vtext = ""
+        for i, energy in enumerate(energies):
+            vtext += "$\Delta E_{} = {:.4f}$\n".format(i+1, 0)
+        vtext = vtext[:-1]
+        energy_text = ax.text2D(0.05, 0.95, vtext, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
+
     #limit animation frames
     M = sol.shape[1]
     frames = M // skip
@@ -593,8 +619,17 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
             
             points[k].set_data(sol[3*k, j], sol[3*k+1, j])
             points[k].set_3d_properties(sol[3*k+2, j])
+            
+            returning = paths + points
+            if energies is not None:
+                vtext = ""
+                for i, energy in enumerate(energies):
+                    vtext += "$\Delta E_{} = {:.4f}$\n".format(i+1, energy[j]-energy[0])
+                vtext = vtext[:-1]
+                energy_text.set_text(vtext)
+                returning.append(energy_text)
 
-        return tuple(paths + points)
+        return tuple(returning)
 
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}_3d.mp4".format(filename))
