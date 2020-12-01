@@ -65,7 +65,7 @@ Your browser doesn't support this video
 ### Escape 3D
 We started the 3rd body's postion along the -z axis and gave it a positive z velocity.
 <video width="640" height="640" controls>
-<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/escape_3d.mp4" type="video/mp4">
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/escape_3body_3d.mp4" type="video/mp4">
 Your browser doesn't support this video
 </video>
 
