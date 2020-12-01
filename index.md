@@ -2,6 +2,12 @@
 
 [Download](https://github.com/samcochran/Gravitational-Slingshot/tree/master/Animations) the animations from here.
 
+### Solar system basic
+<video width="640" height="640" controls>
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/solar_system_basic.mp4" type="video/mp4">
+Your browser doesn't support this video
+</video>
+
 ### Messy
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/messy.mp4" type="video/mp4">
