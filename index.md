@@ -38,6 +38,18 @@ Your browser doesn't support this video
 Your browser doesn't support this video
 </video>
 
+### Clean slingshot gridsearch
+<video width="640" height="640" controls>
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/clean_slingshot.mp4" type="video/mp4">
+Your browser doesn't support this video
+</video>
+
+### Chaotic perturbations
+<video width="640" height="640" controls>
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/chaotic.mp4" type="video/mp4">
+Your browser doesn't support this video
+</video>
+
 ### Escape
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/escape.mp4" type="video/mp4">
