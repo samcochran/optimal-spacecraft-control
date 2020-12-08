@@ -20,7 +20,7 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
         title (string): the title for plot
         show_quivers (bool): an optional parameter (default=False) for whether or not to plot the acceleration vector field at t_N
         show_speed (int): show the initial and final speed of the 3rd body (useful for evaluating slingshot effects)
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
     """
 
@@ -69,10 +69,10 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
         ax.set_ylim(lim[2], lim[3])
     else:
         raise ValueError("lim must either have 2 entries or 4 entries!")
-       
+
     if show_plot:
         plt.show()
-        
+
 def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
@@ -80,7 +80,7 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
         sol (ndarray): an (6n x M) array containing the xyz coordinates
             for the n bodies over a timespan {t_0, ..., t_M}
         title (string): the title for plot
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
         colors (list): a list of matplotlib colors to color each body by. If there are less colors than bodies, it will
             cycle through the list again. Default: None leaves the colors up to matplotlib
@@ -91,7 +91,7 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
     fig, ax = plt.subplots()
 
     n = len(sol)//6
-    
+
     for i in range(n):
         j = i*3
         if colors is None:
@@ -111,7 +111,7 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
         vtext = vtext[:-1]
         ax.text(0.05, 0.25, vtext, transform=ax.transAxes, fontsize=11,
             verticalalignment='top', bbox=props)
-            
+
     # Set plot parameters and labels
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
@@ -124,9 +124,9 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
         ax.set_ylim(lim[2], lim[3])
     else:
         raise ValueError("lim must either have 2 entries or 4 entries!")
-       
+
     plt.show()
-    
+
 
 def get_acc_quivers(sol, ms, xlim, ylim, grid_size=25):
     """Get acceleration vector field on the 3rd body given the current solution (only using the posiitions of the 1st and
@@ -148,7 +148,7 @@ def get_acc_quivers(sol, ms, xlim, ylim, grid_size=25):
     scaled_a = np.log1p(np.log1p(np.abs(a)))
     #print(scaled_a.max(), scaled_a.min(), scaled_a.mean())
     a = np.sign(a)*scaled_a
-    
+
     a_x, a_y = a
     return u3x, u3y, a_x, a_y
 
@@ -162,12 +162,12 @@ def animate_solution(sols, title, filename, skip=40, interval=30., ms=(1,1), lim
         filename (string): the name for the file the animation is saved to (NB: ".mp4" is always appended to this)
         skip (int): the number of t values to skip for each frame of animation. At the current solution resolution,
             skipping 40 points is recommended (i.e. only every 40 xy values will be plotted)
-        interval (float): an argument passed onto the FuncAnimation class for how many miliseconds to include 
+        interval (float): an argument passed onto the FuncAnimation class for how many miliseconds to include
             between each frame
         ms (tuple): the masses of the first and second bodies (used to calculate the acceleration vector field)
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
-        show_quivers (bool): an optional parameter (default=True) for whether or not to include the acceleration 
+        show_quivers (bool): an optional parameter (default=True) for whether or not to include the acceleration
             vector field in the animation
         show_speed (bool): whether or not to display a text box with the speed of the 3rd body, default: True
     """
@@ -179,7 +179,7 @@ def animate_solution(sols, title, filename, skip=40, interval=30., ms=(1,1), lim
         plot_multiple = False
         sol = sols
         sols = [sol]
-        
+
     fig, ax = plt.subplots()
 
     #First body
@@ -201,7 +201,7 @@ def animate_solution(sols, title, filename, skip=40, interval=30., ms=(1,1), lim
             else:
                 third, = ax.plot([], [], color='indigo', ls=':')
             third_pt, = ax.plot(solution[6, 0], solution[7, 0], color='indigo', marker='o')
-            
+
             thirds.append(third)
             third_pts.append(third_pt)
     else:
@@ -250,10 +250,10 @@ def animate_solution(sols, title, filename, skip=40, interval=30., ms=(1,1), lim
         j = i*skip+offset
         first.set_data(sol[0, :j+1], sol[1, :j+1])
         second.set_data(sol[3, :j+1], sol[4, :j+1])
-            
+
         first_pt.set_data(sol[0, j], sol[1, j])
         second_pt.set_data(sol[3, j], sol[4, j])
-        
+
         for i, solu in enumerate(sols):
             thirds[i].set_data(solu[6, :j+1], solu[7, :j+1])
             third_pts[i].set_data(solu[6, j], solu[7, j])
@@ -273,8 +273,8 @@ def animate_solution(sols, title, filename, skip=40, interval=30., ms=(1,1), lim
 
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}.mp4".format(filename))
-    plt.show()
-    
+    # plt.show()
+
 def animate_nbody(sol, title, filename, skip=40, interval=30., lim=(-5,5), colors=None, energies=None):
     """ Animates in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
@@ -285,18 +285,18 @@ def animate_nbody(sol, title, filename, skip=40, interval=30., lim=(-5,5), color
         skip (int): the number of t values to skip for each frame of animation. At the current solution resolution,
             skipping 40 points is recommended (i.e. only every 40 xy values will be plotted)
         interval (float): an argument passed onto the FuncAnimation class for how many milliseconds to include between each frame
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
         colors (list): a list of matplotlib colors to color each body by. If there are less colors than bodies, it will
             cycle through the list again. Default: None leaves the colors up to matplotlib
         energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
             Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
             Default: None, no text will be displayed.
-    """        
+    """
     fig, ax = plt.subplots()
 
     n = len(sol)//6
-    
+
     #Set up lines
     paths, points = [], []
     for i in range(n):
@@ -343,11 +343,11 @@ def animate_nbody(sol, title, filename, skip=40, interval=30., lim=(-5,5), color
     def update(i):
         j = i*skip+offset
         for k in range(n):
-            paths[k].set_data(sol[3*k, :j+1], sol[3*k+1, :j+1])            
+            paths[k].set_data(sol[3*k, :j+1], sol[3*k+1, :j+1])
             points[k].set_data(sol[3*k, j], sol[3*k+1, j])
-        
+
         returning = paths + points
-        
+
         if energies is not None:
             text = ""
             for i, energy in enumerate(energies):
@@ -369,7 +369,7 @@ def plot_sol3d(sol, title, lim=(-5,5)):
         sol (ndarray): an (18 x N) array (but only the first 9 columns are needed) containing the xyz coordinates
             for the 3 bodies over a timespan {t_0, ..., t_N}
         title (string): the title for plot
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or
             a 6-entry tuple (xmin, xmax, ymin, ymax, zmin, zmax) setting different limits for each axis
     """
     fig = plt.figure()
@@ -405,7 +405,7 @@ def plot_sol3d(sol, title, lim=(-5,5)):
     else:
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
     plt.show()
-    
+
 def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
     """ Plots in 3d a solution to the n-body problem.
 
@@ -413,7 +413,7 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
         sol (ndarray): a (6n x M) array (but only the first 3n columns are needed) containing the xyz coordinates
             for the n bodies over a timespan {t_0, ..., t_M}
         title (string): the title for plot
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or
             a 6-entry tuple (xmin, xmax, ymin, ymax, zmin, zmax) setting different limits for each axis
         colors (list): an optional list of colors to plot each body in.
         energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
@@ -421,20 +421,20 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
             Default: None, no text will be displayed.
     """
     n = len(sol)//6
-    
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    
+
     for i in range(n):
         j = i*3
-        if colors is None:        
+        if colors is None:
             line, = ax.plot(sol[j, :], sol[j+1, :], sol[j+2, :], label=f'Body {i+1}')
             ax.plot(sol[j, -1], sol[j+1, -1], sol[j+2, -1], color=line.get_color(), marker='o')
         else:
             color = colors[i % len(colors)]
             ax.plot(sol[j, :], sol[j+1, :], sol[j+2, :], color=color, label=f'Body {i+1}')
             ax.plot(sol[j, -1], sol[j+1, -1], sol[j+2, -1], color=color, marker='o')
-        
+
     #energy text
     if energies is not None:
         props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
@@ -444,7 +444,7 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
         vtext = vtext[:-1]
         ax.text2D(0.05, 0.95, vtext, transform=ax.transAxes, fontsize=11,
             verticalalignment='top', bbox=props)
-        
+
     ax.set_title(title, fontsize=16)
     ax.legend(fontsize=12)
     if len(lim) == 2:
@@ -470,7 +470,7 @@ def animate_sol3d(sol, title, filename, skip=40, interval=30, lim=(-5,5)):
         skip (int): the number of t values to skip for each frame of animation. At the current solution resolution,
             skipping 40 points is recommended. (i.e. only every 40 xyz values will be plotted)
         interval (float): an argument passed onto the FuncAnimation class for how many miliseconds to include between each frame
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or
             a 6-entry tuple (xmin, xmax, ymin, ymax, zmin, zmax) setting different limits for each axis
     """
     fig = plt.figure()
@@ -554,7 +554,7 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
         skip (int): the number of t values to skip for each frame of animation. At the current solution resolution,
             skipping 40 points is recommended. (i.e. only every 40 xyz values will be plotted)
         interval (float): an argument passed onto the FuncAnimation class for how many miliseconds to include between each frame
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or 
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x, y, and z) or
             a 6-entry tuple (xmin, xmax, ymin, ymax, zmin, zmax) setting different limits for each axis
         colors (list): an optional list of colors to plot each body in.
         energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
@@ -616,10 +616,10 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
         for k in range(n):
             paths[k].set_data(sol[3*k, :j+1], sol[3*k+1, :j+1])
             paths[k].set_3d_properties(sol[3*k+2, :j+1])
-            
+
             points[k].set_data(sol[3*k, j], sol[3*k+1, j])
             points[k].set_3d_properties(sol[3*k+2, j])
-            
+
             returning = paths + points
             if energies is not None:
                 vtext = ""
