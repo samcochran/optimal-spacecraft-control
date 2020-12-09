@@ -11,7 +11,7 @@ from simulation import quiver_acceleration
 style.use('seaborn')
 rcParams['figure.figsize'] = 10, 10
 
-def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=None, lim=(-5,5)):
+def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=None, lim=(-5,5), savefile=None):
     """ Plots in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -70,10 +70,12 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
     else:
         raise ValueError("lim must either have 2 entries or 4 entries!")
 
+    if savefile is not None:
+        plt.savefig(savefile)
     if show_plot:
         plt.show()
 
-def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
+def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -125,6 +127,8 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None):
     else:
         raise ValueError("lim must either have 2 entries or 4 entries!")
 
+    if savefile is not None:
+        plt.savefig(savefile)
     plt.show()
 
 
@@ -362,7 +366,7 @@ def animate_nbody(sol, title, filename, skip=40, interval=30., lim=(-5,5), color
     ani.save("../Animations/{}.mp4".format(filename))
     plt.show()
 
-def plot_sol3d(sol, title, lim=(-5,5)):
+def plot_sol3d(sol, title, lim=(-5,5), savefile=None):
     """ Plots in 3d a solution to the 3-body problem.
 
     Inputs:
@@ -404,9 +408,11 @@ def plot_sol3d(sol, title, lim=(-5,5)):
         ax.set_zlim(lim[4], lim[5])
     else:
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
+    if savefile is not None:
+        plt.savefig(savefile)
     plt.show()
 
-def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
+def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None):
     """ Plots in 3d a solution to the n-body problem.
 
     Inputs:
@@ -457,6 +463,9 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None):
         ax.set_zlim(lim[4], lim[5])
     else:
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
+    
+    if savefile is not None:
+        plt.savefig(savefile)
     plt.show()
 
 def animate_sol3d(sol, title, filename, skip=40, interval=30, lim=(-5,5)):
