@@ -8,4 +8,4 @@ To see our code for simulating and plotting gravitational dynamics, see the code
 
 To see animations of the system's dynamics, follow the link below.
 
-[See our animations](https://samcochran.github.io/Gravitational-Slingshot/)
+[See our animations.](https://samcochran.github.io/Gravitational-Slingshot/)
