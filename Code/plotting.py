@@ -71,7 +71,7 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
         raise ValueError("lim must either have 2 entries or 4 entries!")
 
     if savefile is not None:
-        plt.savefig(savefile)
+        plt.savefig(f"../Plots/{savefile}")
     if show_plot:
         plt.show()
 
@@ -128,7 +128,7 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None
         raise ValueError("lim must either have 2 entries or 4 entries!")
 
     if savefile is not None:
-        plt.savefig(savefile)
+        plt.savefig(f"../Plots/{savefile}")
     plt.show()
 
 
@@ -409,7 +409,7 @@ def plot_sol3d(sol, title, lim=(-5,5), savefile=None):
     else:
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
     if savefile is not None:
-        plt.savefig(savefile)
+        plt.savefig(f"../Plots/{savefile}")
     plt.show()
 
 def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None):
@@ -465,7 +465,7 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None, savefile=No
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
     
     if savefile is not None:
-        plt.savefig(savefile)
+        plt.savefig(f"../Plots/{savefile}")
     plt.show()
 
 def animate_sol3d(sol, title, filename, skip=40, interval=30, lim=(-5,5)):
