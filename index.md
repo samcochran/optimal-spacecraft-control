@@ -44,7 +44,7 @@ Your browser doesn't support this video
 
 ### Escape
 
-This was our first time finding initial conditions that allow the third body to slingshot off one of the primaries and then escape the system.
+This was our first time finding initial conditions that allow the third body to slingshot off one of the primaries and then escape the system.  The light gray arrows show the acceleration field of the system, and indicate where a massless body would accelerate at each point in space due to the gravitational force of the two primaries.
 
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/escape.mp4" type="video/mp4">
