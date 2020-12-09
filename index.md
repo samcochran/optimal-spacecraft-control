@@ -36,7 +36,7 @@ Your browser doesn't support this video
 This model also uses the proper mass ratio for the sun and Jupiter, rather than the toy problems in other animations. Now, however we give the third body a small positive mass (rather than modeling it as being massless).  This is slightly more realistic, but encouragingly, the results are basically identical to the previous model that used a massless third body, indicating that our model is structurally stable.
 
 <video width="640" height="640" controls>
-<source src="https://github.com/samcochran/Gravitational-Slingshot/blob/master/Animations/solar_system_general.mp4" type="video/mp4">
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/solar_system_general.mp4" type="video/mp4">
 Your browser doesn't support this video
 </video>
 
