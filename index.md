@@ -13,6 +13,16 @@ I created a function that accepts a goal point and a guess for a set of initial 
 Your browser doesn't support this video
 </video>
 
+<video width="640" height="640" controls>
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/guided2.mp4" type="video/mp4">
+Your browser doesn't support this video
+</video>
+
+<video width="640" height="640" controls>
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/guided2.mp4" type="video/mp4">
+Your browser doesn't support this video
+</video>
+
 ## Finding viable initial conditions to execute the slingshot maneuver
 
 ### Clean slingshot gridsearch
