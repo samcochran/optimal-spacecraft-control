@@ -108,7 +108,7 @@ Your browser doesn't support this video
 This model shows a messy trajectory achieved by choosing specific initial conditions for the toy problem with equal masses.  It is interesting to watch how the third body moves in tandem with one of the larger primaries, oscillating aroudn it as both orbit the barycenter.
 
 <video width="640" height="640" controls>
-<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/messy.mp4" type="video/mp4">
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/messy_3d.mp4" type="video/mp4">
 Your browser doesn't support this video
 </video>
 
