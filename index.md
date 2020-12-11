@@ -6,7 +6,9 @@
 
 ### Using optimization tools to find initial velocity conditions for the third body that result in a trajectory passing through a desired point in space
 
-I created a function that accepts a goal point and a guess for a set of initial conditions, and finds the initial velocity condidions for the third body that allow it to pass through the goal point.  The function only changes the initial velocity conditions for the third body to achieve this goal.  Though imperfect, this does a good job of allowing us to just pass in a point we want the third body to pass through and then generating ICs that give us the desired trajectory passing through that point.
+I created a function that accepts a goal point and a guess for a set of initial conditions, and finds the initial velocity condidions for the third body that allow it to pass through the goal point.  Though imperfect, this does a good job of allowing us to just pass in a point we want the third body to pass through and then generating ICs that give us the desired trajectory passing through that point.
+
+Amazingly, we are able to execute a wide array of very specific trajectories by changing only the initial velocity conditions for the third body .  Using optimization tools, we are able to very accurately get the third body to pass through the point we want it to by starting it with the right velocity.  Thus, as long as we can place the third body in the indicated position in space with the proper velocity, it is able to move through the maneuvers needed to arrive at the desired destination without having to use any power or thrust.  If we can place it right, it simply moves with the gravitational currents through the slingshot maneuver and to the target point.
 
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/guided.mp4" type="video/mp4">
