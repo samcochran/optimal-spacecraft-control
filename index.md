@@ -19,7 +19,7 @@ Your browser doesn't support this video
 </video>
 
 <video width="640" height="640" controls>
-<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/guided2.mp4" type="video/mp4">
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/guided3.mp4" type="video/mp4">
 Your browser doesn't support this video
 </video>
 
