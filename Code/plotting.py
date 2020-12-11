@@ -60,7 +60,7 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
     # Set plot parameters and labels
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
-    ax.legend(loc="upper right", fontsize=12)
+    ax.legend(fontsize=12)
     if len(lim) == 2:
         ax.set_xlim(*lim)
         ax.set_ylim(*lim)
@@ -241,7 +241,7 @@ def animate_solution(sols, title, filename, skip=40, interval=30., ms=(1,1), lim
     # Set plot parameters and labels
     ax.set_xlim(*xlim)
     ax.set_ylim(*ylim)
-    ax.legend(loc="upper right", fontsize=12, bbox_to_anchor=(1, 0.5))
+    ax.legend(fontsize=12, bbox_to_anchor=(1, 1.05))
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
 
@@ -463,7 +463,7 @@ def plot_nbody3d(sol, title, lim=(-5,5), colors=None, energies=None, savefile=No
         ax.set_zlim(lim[4], lim[5])
     else:
         raise ValueError("lim tuple must either have 2 elements or 6 elements!")
-    
+
     if savefile is not None:
         plt.savefig(f"../Plots/{savefile}")
     plt.show()
