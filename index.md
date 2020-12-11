@@ -2,6 +2,17 @@
 
 [Download](https://github.com/samcochran/Gravitational-Slingshot/tree/master/Animations) the animations from here.
 
+## Automating the initial condition selection process
+
+### Using optimization tools to find initial velocity conditions for the third body that result in a trajectory passing through a desired point in space
+
+I created a function that accepts a goal point and a guess for a set of initial conditions, and finds the initial velocity condidions for the third body that allow it to pass through the goal point.  The function only changes the initial velocity conditions for the third body to achieve this goal.  Though imperfect, this does a good job of allowing us to just pass in a point we want the third body to pass through and then generating ICs that give us the desired trajectory passing through that point.
+
+<video width="640" height="640" controls>
+<source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/guided.mp4" type="video/mp4">
+Your browser doesn't support this video
+</video>
+
 ## Finding viable initial conditions to execute the slingshot maneuver
 
 ### Clean slingshot gridsearch
