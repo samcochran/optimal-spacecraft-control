@@ -11,7 +11,7 @@ from simulation import quiver_acceleration
 style.use('seaborn')
 rcParams['figure.figsize'] = 10, 10
 
-def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=None, lim=(-5,5), savefile=None):
+def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax=None, lim=(-5,5), no_grid=True, savefile=None):
     """ Plots in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -20,8 +20,11 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
         title (string): the title for plot
         show_quivers (bool): an optional parameter (default=False) for whether or not to plot the acceleration vector field at t_N
         show_speed (int): show the initial and final speed of the 3rd body (useful for evaluating slingshot effects)
+        ax (pyplot.axis) the axis to plot the solution on. If None (default), a new figure and axis will be created
+        no_grid (bool): whether to turn the grid off or not using ax.grid() [Default: True]
         lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
+        savefile (string) if not None, this plot will be saved to the path "../Plots/{savefile}" using plt.savefig
     """
 
     if ax == None:
@@ -70,12 +73,15 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=True, ax=
     else:
         raise ValueError("lim must either have 2 entries or 4 entries!")
 
+    if no_grid:
+        ax.grid()
+
     if savefile is not None:
         plt.savefig(f"../Plots/{savefile}")
     if show_plot:
         plt.show()
 
-def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None):
+def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_grid=True, savefile=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -86,11 +92,20 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
         colors (list): a list of matplotlib colors to color each body by. If there are less colors than bodies, it will
             cycle through the list again. Default: None leaves the colors up to matplotlib
+        ax (pyplot.axis) the axis to plot the solution on. If None (default), a new figure and axis will be created,
+            and the plot will be shown with plt.show(). If the axis is supplied plt.show() will not be called, in case
+            the user is plotting a bunch of subplots
         energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
             Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
             Default: None, no text will be displayed.
+        no_grid (bool): whether to turn the grid off or not using ax.grid() [Default: True]
+        savefile (string) if not None, this plot will be saved to the path "../Plots/{savefile}" using plt.savefig
     """
-    fig, ax = plt.subplots()
+    if ax == None:
+        fig, ax = plt.subplots()
+        show_plot = True
+    else:
+        show_plot = False
 
     n = len(sol)//6
 
@@ -127,9 +142,14 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, energies=None, savefile=None
     else:
         raise ValueError("lim must either have 2 entries or 4 entries!")
 
+    if no_grid:
+        ax.grid()
+
     if savefile is not None:
         plt.savefig(f"../Plots/{savefile}")
-    plt.show()
+        
+    if show_plot:
+        plt.show()
 
 
 def get_acc_quivers(sol, ms, xlim, ylim, grid_size=25):
