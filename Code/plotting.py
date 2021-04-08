@@ -81,7 +81,7 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax
     if show_plot:
         plt.show()
 
-def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_grid=True, savefile=None):
+def plot_nbody(sol, title, lim=(-5,5), plot_third=True, colors=None, ax=None, energies=None, no_grid=True, savefile=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -111,6 +111,8 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_g
 
     for i in range(n):
         j = i*3
+        if i == 2 and not plot_third:
+            continue
         if colors is None:
             line, = ax.plot(sol[j, :], sol[j+1, :], label=f'Body {i+1}')
             ax.plot(sol[j, -1], sol[j+1, -1], color=line.get_color(), marker='o')
@@ -147,7 +149,7 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_g
 
     if savefile is not None:
         plt.savefig(f"../Plots/{savefile}")
-        
+
     if show_plot:
         plt.show()
 
@@ -317,7 +319,7 @@ def animate_nbody(sol, title, filename, skip=40, interval=30., lim=(-5,5), color
             Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
             Default: None, no text will be displayed.
     """
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     n = len(sol)//6
 
@@ -662,4 +664,94 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
 
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}_3d.mp4".format(filename))
+    plt.show()
+
+def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30., lim=(-5,5), energies=None):
+
+    # Concatenate/combine to plot 3 bodies, where the third body includeds control thrusts
+    opt_tf = sol2.p[0]
+    control_sol = sol2.y
+    n_points = control_sol.shape[1]
+    grid = np.linspace(0, opt_tf, n_points)
+    orig_sol = sol.sol(grid)
+    solution = np.vstack((orig_sol[:6, :], # Primary body positions
+               control_sol[:2, :], np.zeros((1, n_points)), # Spacecraft positions
+               orig_sol[9:15], # Primary body velocities
+               control_sol[2:4, :], np.zeros((1, n_points)))) # Spacecraft velocities
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    n = len(solution)//6
+
+    # Set up the stuff for the spacecraft
+    paths, points = [], []
+    path, = ax.plot([], [], ls='-', color='tomato', label='Scaled Thrust')
+    point, = ax.plot(solution[3*(n-1), 0], solution[3*(n-1)+1, 0] , marker='o', label='Spacecraft')
+    paths.append(path)
+    points.append(point)
+
+    #Set up lines for the primaries
+    for i in range(n - 1):
+        path, = ax.plot([], [], ls=':')
+        point, = ax.plot(solution[3*i, 0], solution[3*i+1, 0], color=path.get_color(), marker='o', label=f'Body {i+1}')
+        paths.append(path)
+        points.append(point)
+
+    # Plot the target
+    ax.scatter(target[0], target[1], color='lightsalmon', label='Target')
+
+    #energy text
+    if energies is not None:
+        props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
+        text = ""
+        for i, energy in enumerate(energies):
+            text += "$\Delta E_{} = {:.4f}$\n".format(i+1, 0)
+        text = text[:-1]
+        energy_text = ax.text(0.05, 0.25, text, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
+
+    #axis limits
+    if len(lim) == 2:
+        ax.set_xlim(*lim)
+        ax.set_ylim(*lim)
+    elif len(lim) ==4:
+        ax.set_xlim(lim[0], lim[1])
+        ax.set_ylim(lim[2], lim[3])
+    else:
+        raise ValueError("lim must either have 2 entries or 4 entries!")
+
+    # Set plot parameters and labels
+    ax.legend(loc="upper right", fontsize=12, bbox_to_anchor=(1, 0.5))
+    ax.set_title(title, fontsize=16)
+    ax.set_aspect('equal')
+
+    #limit animation frames
+    N = solution.shape[1]
+    frames = N // skip
+    offset = N % skip
+    scale = np.max(u)*4
+
+    def update(i):
+        j = i*skip+offset
+        thrust = u[:, j] / scale # note that this is scaled by scale
+        paths[0].set_data([solution[3*(n-1), j], solution[3*(n-1), j] - thrust[0]], [solution[3*(n-1)+1, j], solution[3*(n-1)+1, j+1] - thrust[1]])
+        points[0].set_data(solution[3*(n-1), j], solution[3*(n-1)+1, j])
+        for k in range(n - 1):
+            paths[k+1].set_data(solution[3*k, :j+1], solution[3*k+1, :j+1])
+            points[k+1].set_data(solution[3*k, j], solution[3*k+1, j])
+
+        returning = paths + points
+
+        if energies is not None:
+            text = ""
+            for i, energy in enumerate(energies):
+                text += "$\Delta E_{} = {:.4f}$\n".format(i+1, energy[j]-energy[0])
+            text = text[:-1]
+            energy_text.set_text(text)
+            returning.append(energy_text)
+
+        return tuple(returning)
+
+    ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
+    ani.save("../Animations/{}.mp4".format(filename))
     plt.show()
