@@ -691,6 +691,9 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
             control.
     """
 
+    # TODO this block is probably bad--we could just index each solution individualy in the update
+    # function, and then it would work for more than just 2 primaries and the spacecraft...
+    #
     # Concatenate/combine to plot 3 bodies, where the third body includeds control thrusts
     opt_tf = sol2.p[0]
     control_sol = sol2.y
@@ -714,14 +717,15 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
     points.append(point)
 
     #Set up lines for the primaries
+    body_names = ['Sun', 'Jupiter']
     for i in range(n - 1):
-        path, = ax.plot([], [], ls=':')
-        point, = ax.plot(solution[3*i, 0], solution[3*i+1, 0], color=path.get_color(), marker='o', label=f'Body {i+1}')
+        path, = ax.plot([], [], ls='-')
+        point, = ax.plot(solution[3*i, 0], solution[3*i+1, 0], color=path.get_color(), marker='o', label=body_names[i])
         paths.append(path)
         points.append(point)
     if plot_ghost_traj:
         path, = ax.plot([], [], ls=':', color='whitesmoke', label='No-Thrust Trajectory')
-
+    paths.append(path)
 
     # Plot the target
     ax.scatter(target[0], target[1], color='lightsalmon', label='Target')
@@ -737,19 +741,23 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
             verticalalignment='top', bbox=props)
 
     #axis limits
-    if len(lim) == 2:
-        ax.set_xlim(*lim)
-        ax.set_ylim(*lim)
-    elif len(lim) ==4:
-        ax.set_xlim(lim[0], lim[1])
-        ax.set_ylim(lim[2], lim[3])
-    else:
-        raise ValueError("lim must either have 2 entries or 4 entries!")
+    if lim is not None:
+        if len(lim) == 2:
+            ax.set_xlim(*lim)
+            ax.set_ylim(*lim)
+        elif len(lim) ==4:
+            ax.set_xlim(lim[0], lim[1])
+            ax.set_ylim(lim[2], lim[3])
 
     # Set plot parameters and labels
-    ax.legend(loc="upper right", fontsize=12, bbox_to_anchor=(1, 0.5))
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = [5, 1, 0, 4, 2, 3] # This just puts it in a more reasonable order--subject to change...
+    handle_order, label_order = [handles[idx] for idx in order],[labels[idx] for idx in order]
+    ax.legend(handle_order, label_order, fontsize=12, loc='lower left')
     ax.set_title(title, fontsize=16)
     ax.set_aspect('equal')
+    plt.gca()
+    plt.axis('off')
 
     #limit animation frames
     N = solution.shape[1]
@@ -766,7 +774,7 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
             paths[k+1].set_data(solution[3*k, :j+1], solution[3*k+1, :j+1])
             points[k+1].set_data(solution[3*k, j], solution[3*k+1, j])
         if plot_ghost_traj:
-            paths[n-1].set_data(orig_sol[6, :j+1], orig_sol[7, :j+1])
+            paths[n].set_data(orig_sol[6, :j+1], orig_sol[7, :j+1])
 
         returning = paths + points
 
