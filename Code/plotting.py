@@ -666,7 +666,30 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
     ani.save("../Animations/{}_3d.mp4".format(filename))
     plt.show()
 
-def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30., lim=(-5,5), energies=None):
+def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30., lim=(-5,5), energies=None, plot_ghost_traj=True):
+    """ Plots in 2d a solution to the n-body problem, where the third body has thrust. Note: z-coordinates are ignored
+
+    Inputs:
+        sol and sol2 are solution objects returned from solve_ivp or solve_bvp (scipy.optimize).  Important
+            attributes are y (solution at mesh grid points), sol (interpolation function, can be called on a grid),
+            and p (free parameter in sol2, corresponds to the final time).
+        u (ndarray): the control parameter values at each point in the solution mesh grid. The array has 2 entries
+            corresponding to thrust in the x and y directions, respectively.
+        target (ndarray): an array with 2 entries corresponding to the x and y coordinates of the target point.
+        title (string): the title for plot
+        filename (string): the location where the animation will be saved. Note that .mp4 will automatically be
+            appended.
+        skip (int): animation parameter
+        interval (float): animation parameter
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
+            a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
+        energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the
+            system.
+            Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
+            Default: None, no text will be displayed.
+        plot_ghost_traj (bool): whether to plot what the trajectory of the third body would be in the absence of
+            control.
+    """
 
     # Concatenate/combine to plot 3 bodies, where the third body includeds control thrusts
     opt_tf = sol2.p[0]
@@ -686,7 +709,7 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
     # Set up the stuff for the spacecraft
     paths, points = [], []
     path, = ax.plot([], [], ls='-', color='tomato', label='Scaled Thrust')
-    point, = ax.plot(solution[3*(n-1), 0], solution[3*(n-1)+1, 0] , marker='o', label='Spacecraft')
+    point, = ax.plot(solution[3*(n-1), 0], solution[3*(n-1)+1, 0] , marker='D', label='Spacecraft')
     paths.append(path)
     points.append(point)
 
@@ -696,6 +719,9 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
         point, = ax.plot(solution[3*i, 0], solution[3*i+1, 0], color=path.get_color(), marker='o', label=f'Body {i+1}')
         paths.append(path)
         points.append(point)
+    if plot_ghost_traj:
+        path, = ax.plot([], [], ls=':', color='whitesmoke', label='No-Thrust Trajectory')
+
 
     # Plot the target
     ax.scatter(target[0], target[1], color='lightsalmon', label='Target')
@@ -739,6 +765,8 @@ def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30.
         for k in range(n - 1):
             paths[k+1].set_data(solution[3*k, :j+1], solution[3*k+1, :j+1])
             points[k+1].set_data(solution[3*k, j], solution[3*k+1, j])
+        if plot_ghost_traj:
+            paths[n-1].set_data(orig_sol[6, :j+1], orig_sol[7, :j+1])
 
         returning = paths + points
 
