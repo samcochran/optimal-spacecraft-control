@@ -1,4 +1,4 @@
-# Animations
+# Animations - Optimal Control
 
 [Download](https://github.com/samcochran/Gravitational-Slingshot/tree/master/Animations) the animations from here.
 
