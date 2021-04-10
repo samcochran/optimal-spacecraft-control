@@ -82,7 +82,7 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax
     if show_plot:
         plt.show()
 
-def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_grid=True, marker='o',
+def plot_nbody(sol, title, lim=(-5,5), plot_third=True, colors=None, ax=None, energies=None, no_grid=True, marker='o',
     last_body_spcft=True, savefile=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
@@ -119,7 +119,9 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_g
             label = "Spacecraft"
         else:
             label = f'Body {i+1}'
-            
+
+        if i == 2 and not plot_third:
+            continue
         if colors is None:
             line, = ax.plot(sol[j, :], sol[j+1, :], label=label)
             ax.plot(sol[j, -1], sol[j+1, -1], color=line.get_color(), marker=marker)
@@ -156,7 +158,7 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_g
 
     if savefile is not None:
         plt.savefig(f"../Plots/{savefile}")
-        
+
     if show_plot:
         plt.show()
 
@@ -509,7 +511,7 @@ def animate_nbody(sol, title, filename, skip=40, interval=30., lim=(-5,5), color
             Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
             Default: None, no text will be displayed.
     """
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     n = len(sol)//6
 
@@ -854,4 +856,130 @@ def animate_nbody3d(sol, title, filename, skip=40, interval=30, lim=(-5,5), colo
 
     ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
     ani.save("../Animations/{}_3d.mp4".format(filename))
+    plt.show()
+
+def animate_control(sol, sol2, u, target, title, filename, skip=40, interval=30., lim=(-5,5), energies=None, plot_ghost_traj=True):
+    """ Plots in 2d a solution to the n-body problem, where the third body has thrust. Note: z-coordinates are ignored
+
+    Inputs:
+        sol and sol2 are solution objects returned from solve_ivp or solve_bvp (scipy.optimize).  Important
+            attributes are y (solution at mesh grid points), sol (interpolation function, can be called on a grid),
+            and p (free parameter in sol2, corresponds to the final time).
+        u (ndarray): the control parameter values at each point in the solution mesh grid. The array has 2 entries
+            corresponding to thrust in the x and y directions, respectively.
+        target (ndarray): an array with 2 entries corresponding to the x and y coordinates of the target point.
+        title (string): the title for plot
+        filename (string): the location where the animation will be saved. Note that .mp4 will automatically be
+            appended.
+        skip (int): animation parameter
+        interval (float): animation parameter
+        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
+            a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
+        energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the
+            system.
+            Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
+            Default: None, no text will be displayed.
+        plot_ghost_traj (bool): whether to plot what the trajectory of the third body would be in the absence of
+            control.
+    """
+
+    # TODO this block is probably bad--we could just index each solution individualy in the update
+    # function, and then it would work for more than just 2 primaries and the spacecraft...
+    #
+    # Concatenate/combine to plot 3 bodies, where the third body includeds control thrusts
+    opt_tf = sol2.p[0]
+    control_sol = sol2.y
+    n_points = control_sol.shape[1]
+    grid = np.linspace(0, opt_tf, n_points)
+    orig_sol = sol.sol(grid)
+    solution = np.vstack((orig_sol[:6, :], # Primary body positions
+               control_sol[:2, :], np.zeros((1, n_points)), # Spacecraft positions
+               orig_sol[9:15], # Primary body velocities
+               control_sol[2:4, :], np.zeros((1, n_points)))) # Spacecraft velocities
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    n = len(solution)//6
+
+    # Set up the stuff for the spacecraft
+    paths, points = [], []
+    path, = ax.plot([], [], ls='-', color='tomato', label='Scaled Thrust')
+    point, = ax.plot(solution[3*(n-1), 0], solution[3*(n-1)+1, 0] , marker='D', label='Spacecraft')
+    paths.append(path)
+    points.append(point)
+
+    #Set up lines for the primaries
+    body_names = ['Sun', 'Jupiter']
+    for i in range(n - 1):
+        path, = ax.plot([], [], ls='-')
+        point, = ax.plot(solution[3*i, 0], solution[3*i+1, 0], color=path.get_color(), marker='o', label=body_names[i])
+        paths.append(path)
+        points.append(point)
+    if plot_ghost_traj:
+        path, = ax.plot([], [], ls=':', color='whitesmoke', label='No-Thrust Trajectory')
+    paths.append(path)
+
+    # Plot the target
+    ax.scatter(target[0], target[1], color='lightsalmon', label='Target')
+
+    #energy text
+    if energies is not None:
+        props = dict(boxstyle='round', facecolor='white', alpha=1, zorder=2)
+        text = ""
+        for i, energy in enumerate(energies):
+            text += "$\Delta E_{} = {:.4f}$\n".format(i+1, 0)
+        text = text[:-1]
+        energy_text = ax.text(0.05, 0.25, text, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
+
+    #axis limits
+    if lim is not None:
+        if len(lim) == 2:
+            ax.set_xlim(*lim)
+            ax.set_ylim(*lim)
+        elif len(lim) ==4:
+            ax.set_xlim(lim[0], lim[1])
+            ax.set_ylim(lim[2], lim[3])
+
+    # Set plot parameters and labels
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = [5, 1, 0, 4, 2, 3] # This just puts it in a more reasonable order--subject to change...
+    handle_order, label_order = [handles[idx] for idx in order],[labels[idx] for idx in order]
+    ax.legend(handle_order, label_order, fontsize=12, loc='lower left')
+    ax.set_title(title, fontsize=16)
+    ax.set_aspect('equal')
+    plt.gca()
+    plt.axis('off')
+
+    #limit animation frames
+    N = solution.shape[1]
+    frames = N // skip
+    offset = N % skip
+    scale = np.max(u)*4
+
+    def update(i):
+        j = i*skip+offset
+        thrust = u[:, j] / scale # note that this is scaled by scale
+        paths[0].set_data([solution[3*(n-1), j], solution[3*(n-1), j] - thrust[0]], [solution[3*(n-1)+1, j], solution[3*(n-1)+1, j+1] - thrust[1]])
+        points[0].set_data(solution[3*(n-1), j], solution[3*(n-1)+1, j])
+        for k in range(n - 1):
+            paths[k+1].set_data(solution[3*k, :j+1], solution[3*k+1, :j+1])
+            points[k+1].set_data(solution[3*k, j], solution[3*k+1, j])
+        if plot_ghost_traj:
+            paths[n].set_data(orig_sol[6, :j+1], orig_sol[7, :j+1])
+
+        returning = paths + points
+
+        if energies is not None:
+            text = ""
+            for i, energy in enumerate(energies):
+                text += "$\Delta E_{} = {:.4f}$\n".format(i+1, energy[j]-energy[0])
+            text = text[:-1]
+            energy_text.set_text(text)
+            returning.append(energy_text)
+
+        return tuple(returning)
+
+    ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
+    ani.save("../Animations/{}.mp4".format(filename))
     plt.show()
