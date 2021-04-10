@@ -81,7 +81,7 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax
     if show_plot:
         plt.show()
 
-def plot_nbody(sol, title, lim=(-5,5), plot_third=True, colors=None, ax=None, energies=None, no_grid=True, savefile=None):
+def plot_nbody(sol, title, lim=(-5,5), plot_third=True, colors=None, ax=None, energies=None, no_grid=True, savefile=None, body_names=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -109,16 +109,19 @@ def plot_nbody(sol, title, lim=(-5,5), plot_third=True, colors=None, ax=None, en
 
     n = len(sol)//6
 
+    if body_names is None:
+        body_names = [f'Body {i}' for i in range(1, n+1)]
+
     for i in range(n):
         j = i*3
         if i == 2 and not plot_third:
             continue
         if colors is None:
-            line, = ax.plot(sol[j, :], sol[j+1, :], label=f'Body {i+1}')
+            line, = ax.plot(sol[j, :], sol[j+1, :], label=body_names[i])
             ax.plot(sol[j, -1], sol[j+1, -1], color=line.get_color(), marker='o')
         else:
             color = colors[i % len(color)]
-            ax.plot(sol[j, :], sol[j+1, :], color=color, label=f'Body {i+1}')
+            ax.plot(sol[j, :], sol[j+1, :], color=color, label=body_names[i])
             ax.plot(sol[j, -1], sol[j+1, -1], color=color, marker='o')
 
     #energy text
