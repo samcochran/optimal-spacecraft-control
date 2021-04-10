@@ -2,6 +2,8 @@
 
 [Download](https://github.com/samcochran/Gravitational-Slingshot/tree/master/Animations) the animations from here.
 
+Checkout our newer [optimal control animations](index.md).
+
 ## Automating the initial condition selection process
 
 ### Using optimization tools to find initial velocity conditions for the third body that result in a trajectory passing through a desired point in space
