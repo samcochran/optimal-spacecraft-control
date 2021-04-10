@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib import style, rcParams
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.patches import FancyArrow
 
 #import project code
 from simulation import quiver_acceleration
@@ -11,7 +12,7 @@ from simulation import quiver_acceleration
 style.use('seaborn')
 rcParams['figure.figsize'] = 10, 10
 
-def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax=None, lim=(-5,5), no_grid=True, savefile=None):
+def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax=None, lim=(-5,5), no_grid=True, marker='o', savefile=None):
     """ Plots in 2d a solution to the 3-body problem. Note: z-coordinates are ignored
 
     Inputs:
@@ -35,15 +36,15 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax
 
     # First body
     first = ax.plot(sol[0, :], sol[1, :], color='steelblue', label='First Body')
-    ax.plot(sol[0, -1], sol[1, -1], color='steelblue', marker='o')
+    ax.plot(sol[0, -1], sol[1, -1], color='steelblue', marker=marker)
 
     # Second body
     second = ax.plot(sol[3, :], sol[4, :], color='seagreen', label='Second Body')
-    ax.plot(sol[3, -1], sol[4, -1], color='seagreen', marker='o')
+    ax.plot(sol[3, -1], sol[4, -1], color='seagreen', marker=marker)
 
     # Third body
     third = ax.plot(sol[6, :], sol[7, :], color='indigo', label='Third Body')
-    ax.plot(sol[6, -1], sol[7, -1], color='indigo', marker='o')
+    ax.plot(sol[6, -1], sol[7, -1], color='indigo', marker=marker)
 
     #quivers
     if show_quivers:
@@ -81,25 +82,28 @@ def plot_solution(sol, title, ms=(1,1), show_quivers=False, show_speed=False, ax
     if show_plot:
         plt.show()
 
-def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_grid=True, savefile=None):
+def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_grid=True, marker='o',
+    last_body_spcft=True, savefile=None):
     """ Plots in 2d a solution to the n-body problem. Note: z-coordinates are ignored
 
     Inputs:
         sol (ndarray): an (6n x M) array containing the xyz coordinates
             for the n bodies over a timespan {t_0, ..., t_M}
         title (string): the title for plot
-        lim (tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
+        lim (=(-5,5), tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
             a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
-        colors (list): a list of matplotlib colors to color each body by. If there are less colors than bodies, it will
+        colors (=None, list): a list of matplotlib colors to color each body by. If there are less colors than bodies, it will
             cycle through the list again. Default: None leaves the colors up to matplotlib
-        ax (pyplot.axis) the axis to plot the solution on. If None (default), a new figure and axis will be created,
+        ax (=None, pyplot.axis) the axis to plot the solution on. If None (default), a new figure and axis will be created,
             and the plot will be shown with plt.show(). If the axis is supplied plt.show() will not be called, in case
             the user is plotting a bunch of subplots
-        energies (ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
+        energies (=None, ndarray): a (n x M) array containing the total energy (kinetic + potential) for each body in the system.
             Using this, text is added displaying the change in energy Delta-E given by E(t_M) - E(t_0).
             Default: None, no text will be displayed.
-        no_grid (bool): whether to turn the grid off or not using ax.grid() [Default: True]
-        savefile (string) if not None, this plot will be saved to the path "../Plots/{savefile}" using plt.savefig
+        no_grid (=True, bool): whether to turn the grid off or not using ax.grid() [Default: True]
+        marker (='o', string): the marker for the planets position at the final time
+        last_body_spcft (=True, bool) if True, label the last body "Spacecraft" instead of "Body {n}"
+        savefile (=None, string) if not None, this plot will be saved to the path "../Plots/{savefile}" using plt.savefig
     """
     if ax == None:
         fig, ax = plt.subplots()
@@ -111,13 +115,18 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_g
 
     for i in range(n):
         j = i*3
+        if last_body_spcft and i == n-1:
+            label = "Spacecraft"
+        else:
+            label = f'Body {i+1}'
+            
         if colors is None:
-            line, = ax.plot(sol[j, :], sol[j+1, :], label=f'Body {i+1}')
-            ax.plot(sol[j, -1], sol[j+1, -1], color=line.get_color(), marker='o')
+            line, = ax.plot(sol[j, :], sol[j+1, :], label=label)
+            ax.plot(sol[j, -1], sol[j+1, -1], color=line.get_color(), marker=marker)
         else:
             color = colors[i % len(color)]
-            ax.plot(sol[j, :], sol[j+1, :], color=color, label=f'Body {i+1}')
-            ax.plot(sol[j, -1], sol[j+1, -1], color=color, marker='o')
+            ax.plot(sol[j, :], sol[j+1, :], color=color, label=label)
+            ax.plot(sol[j, -1], sol[j+1, -1], color=color, marker=marker)
 
     #energy text
     if energies is not None:
@@ -151,6 +160,189 @@ def plot_nbody(sol, title, lim=(-5,5), colors=None, ax=None, energies=None, no_g
     if show_plot:
         plt.show()
 
+def plot_guess_vs_target(sol, t_guess, target):
+    """Plot the t_guess for the optimal control solution vs the target for the optimal control.
+    
+    Returns:
+        pos_guess (ndarray) shape (2,) the final position of the guessed path for the target
+    """
+    t = np.linspace(0, t_guess, 100)
+    pos = sol.sol(t)[6:8, :]
+    pos_guess = pos[:,-1]
+    print(f"t_guess = {t_guess}, Position: {pos_guess}")
+    
+    ax = plt.gca()
+    spacecraft_color = "pink" #f"C{len(sol.y)//6-1}"
+    plt.plot(*pos, color=spacecraft_color, zorder = 5)
+    plt.scatter(*pos_guess, color=spacecraft_color, marker='D', label="Position at t_guess", zorder=5)
+    plt.scatter(*target, color="magenta", marker='D', label="Target", zorder=6)
+    plot_nbody(sol.y, "Guess with no control", ax=ax)
+    
+    plt.show()
+    
+    return pos_guess
+
+def plot_control(sol, sol2, u, pos_guess, target):
+    """Plot the solution to the optimal control problem.
+    
+    Inputs:
+        sol (OdeSolution) the solution to the ivp of the nbody system used to solve the optimal control
+        sol2 (OdeSolution) the solution of the optimal control
+        u (ndarray) shape (2,N) the optimal controls derived from the optimal control solution
+        pos_guess (ndarray) shape (2,) the position of the uncontrolled spacecraft at t_guess
+        target (ndarray) shape (2,) the target position of the spacecraft for the optimal control problem
+    """
+    print("t_f =", sol2.p[0])
+    print("m_f =", sol2.y[4,-1])
+    print("x(t_f) = ", sol2.y[:2, -1])
+    print("v(t_f) = ", sol2.y[2:4, -1])
+
+    fig, axs = plt.subplots(1,2, figsize=(13, 6))
+    ax1, ax2 = axs
+
+    ax1.plot(sol2.y[0], sol2.y[1], color = 'pink', zorder=10, label="Controlled Body")
+    ax1.scatter(*pos_guess, color="C2", marker='D', label="Position at t_guess")
+    ax1.scatter(*target, color="magenta", marker='D', label="Target")
+    plot_nbody(sol.y, "Optimal Control solution", ax=ax1)
+
+    #Plot optimal control over time
+    u1, u2 = u
+    t  = sol2.p[0]*sol2.x
+    ax2.plot(t, u1, c='C3', label="$u_1(t)$")
+    ax2.plot(t, u2, c='C5', label="$u_2(t)$")
+    ax2.plot(t, sol2.y[4], c='C4', label="$m(t)$")
+    ax2.set_xlabel("t")
+    ax2.set_ylabel("u")
+    ax2.legend()
+    ax2.grid() #remove grid
+    ax2.set_title("Optimal control and mass")
+
+    plt.tight_layout()
+    plt.show()
+    
+def animate_control(nbody_sol, sol2, u, target, filename, title="", skip=40, interval=30., lim=(-5,5),
+    marker='o', show_mt=True, show_control=True, colors=None, bitrate=None, dpi=72):
+    """ Animates in a solution to a spacecraft optimal control problem.
+
+    Inputs:
+        sol (OdeSolution) the solution to the ivp of the nbody system used to solve the optimal control
+        sol2 (OdeSolution) the solution of the optimal control
+        u (ndarray) shape (2,N) the optimal controls derived from the optimal control solution
+        target (ndarray) shape (2,) the target position of the spacecraft for the optimal control problem
+        filename (string): the name for the file the animation is saved to (NB: ".mp4" is always appended to this)
+        
+        [Keyword arguments with defaults]
+        title (="", string): the title for plot
+        skip (=40, int): the number of t values to skip for each frame of animation. At the current solution resolution,
+            skipping 40 points is recommended (i.e. only every 40 xy values will be plotted)
+        interval (=30, float): an argument passed onto the FuncAnimation class for how many milliseconds to include between each frame
+        lim (=(-5,5), tuple): either a tuple with 2 entries for using the same (min, max) limits for each axis (x and y) or
+            a 4-entry tuple (xmin, xmax, ymin, ymax) setting different limits for each axis
+        marker (='o', string) the marker to use for the planets and spacecraft
+        show_mt (=True, bool) whether or not to show the textbox with t and the mass m(t)
+        show_control (=True, bool) whether or not to show the arrow pointing in the direction and relative magnitude of the control
+        colors (=None, list): a list of matplotlib colors to color each body by. If there are less colors than bodies, it will
+            cycle through the list again. Default: None leaves the colors up to matplotlib
+        bitrate (=None, int) the bitrate to export the animation at
+        dpi (=72, int) the dpi to export the animation at
+    """
+    fig, ax = plt.subplots()
+    
+    #Turn off grid
+    ax.grid()
+    
+    n = len(nbody_sol.y)//6
+    
+    #get the nbody solution on the same timescale
+    sol = nbody_sol.sol(sol2.p[0]*sol2.x)
+
+    #Set up lines
+    paths, points = [], []
+    for i in range(n - 1):
+        if colors is None:
+            path, = ax.plot([], [], ls=':', label=f'Body {i+1}')
+            point, = ax.plot(sol[3*i, 0], sol[3*i+1, 0], color=path.get_color(), marker=marker)
+        else:
+            color = colors[i % len(colors)]
+            path, = ax.plot([], [], color=color, ls=':', label='First Body')
+            point, = ax.plot(sol[3*i, 0], sol[3*i+1, 0], color=color, marker=marker)
+        paths.append(path)
+        points.append(point)
+    #Setup spacecraft
+    craft_color = "pink" if colors is None else colors[-1]
+    craft_path, = ax.plot([], [], ls=':', color=craft_color, label="Spacecraft")
+    craft_pt, = ax.plot(sol2.y[0, 0], sol2.y[1, 0], color=craft_color, marker=marker)
+    
+    #plot target
+    target_pt, = ax.plot(*target, color="magenta", marker='D', label="Target")
+
+    #mass text
+    if show_mt:
+        m0 = sol2.y[4,0]
+        props = dict(boxstyle='round', facecolor='black', alpha=1, zorder=2)
+        text_contents = "t = 0\n" + f"m(t) = {m0:.4f}"
+        text = ax.text(0.05, 0.25, text_contents, transform=ax.transAxes, fontsize=11,
+            verticalalignment='top', bbox=props)
+
+    #axis limits
+    if len(lim) == 2:
+        ax.set_xlim(*lim)
+        ax.set_ylim(*lim)
+    elif len(lim) ==4:
+        ax.set_xlim(lim[0], lim[1])
+        ax.set_ylim(lim[2], lim[3])
+    else:
+        raise ValueError("lim must either have 2 entries or 4 entries!")
+
+    # Set plot parameters and labels
+    ax.legend(loc="upper right", fontsize=12, bbox_to_anchor=(1, 0.5))
+    ax.set_title(title, fontsize=16)
+    ax.set_aspect('equal')
+
+    #limit animation frames
+    N = sol.shape[1]
+    frames = N // skip
+    offset = N % skip
+    
+    if show_control:
+        control_arrow_props = {
+            "alpha":0.75,
+            "overhang":0.3,
+            "width":0.02,
+            "head_width":0.1,
+            "color":"red"
+        }
+        lim_scale = np.max(lim) - np.min(lim)
+        u_scale = np.max(np.linalg.norm(u, axis=0))
+        u = 2*u/u_scale * lim_scale / 10
+        control_arrow = ax.arrow(*sol2.y[:2, 0], *u[:,0], **control_arrow_props)
+
+    def update(i):
+        j = i*skip+offset
+        for k in range(n - 1):
+            paths[k].set_data(sol[3*k, :j+1], sol[3*k+1, :j+1])
+            points[k].set_data(sol[3*k, j], sol[3*k+1, j])
+
+        craft_path.set_data(*sol2.y[0:2,:j+1])
+        craft_pt.set_data(*sol2.y[0:2, j])
+
+        returning = paths + points + [craft_path, craft_pt]
+        
+        if show_control:
+            arrow2 = FancyArrow(*sol2.y[:2, j], *u[:,j], **control_arrow_props)
+            control_arrow.set_xy(arrow2.get_xy())
+            returning.append(control_arrow)
+        
+        if show_mt:
+            new_text = f"t = {sol2.x[j]:.4f}\nm(t) = {sol2.y[4,j]:.4f}"
+            text.set_text(new_text)
+            returning.append(text)
+
+        return tuple(returning)
+
+    ani = animation.FuncAnimation(fig, update, frames=range(frames), interval=interval)
+    ani.save("../Animations/{}.mp4".format(filename), bitrate=bitrate, dpi=dpi)
+    plt.show()
 
 def get_acc_quivers(sol, ms, xlim, ylim, grid_size=25):
     """Get acceleration vector field on the 3rd body given the current solution (only using the posiitions of the 1st and
