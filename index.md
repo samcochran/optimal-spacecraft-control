@@ -8,14 +8,14 @@ Check out our [other animations](nbody_slingshot.md) for modelling the nbody pro
 
 Here we have animations of the optimal paths found by our optimal control solutions. The thrust line in the animation is directed opposite the control, representing the direction fuel would be burned in order to generate the thrust required by the spacecraft for the optimal solution. All of these solutions are for a spacecraft navigating the solar system, which the Sun and Jupiter as primary bodies influencing the gravity.
 
-## First control attempt
+## 180 thrust reversal
 
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/initial_control_attempt.mp4" type="video/mp4">
 Your browser doesn't support this video
 </video>
 
-Interestingly, the control's direction rotates 180 degrees as it passes by Jupiter to avoid getting caught by Jupiter's gravitational field.  Note the continued and varied fuel use throughout the flight.
+Interestingly, the control's direction rotates 180 degrees as it passes by Jupiter to avoid getting caught by Jupiter's gravitational field. We never explicitly engineered the cost functional to discourage the spacecraft from getting close to planets.  Note the continued and varied fuel use throughout the flight.
 
 ## Slingshot off the sun
 
@@ -26,7 +26,7 @@ Your browser doesn't support this video
 
 Here, we note that since the target destination is far below where the no-thrust trajectory would carry the spacecraft, the control solution has the craft thrust strongly downward after passing by the sun, cutting off the thrust for the remainder of the flight. This is interesting, and it fits with our intuition that it is best to spend the beginning of the flight using fuel to maneuver the craft into the desired trajectory, and then to stop thrusting to conserve fuel until arriving at the destination. The thrust in the beginning to the left accelerates the craft towards the sun and the target destination on the other side. This also demonstrates the spacecraft using the sun's gravity as a slingshot to get to the target past.
 
-## Third control attempt
+## Continuous thrust
 
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/third_control_attempt.mp4" type="video/mp4">
@@ -35,7 +35,7 @@ Your browser doesn't support this video
 
 In this scenario, our destination is again far below where the no-thrust trajectory would take the spacecraft, so we have to thrust downward.  But in this case, the dynamics of the system are such that a more continuous burn is needed through most of the flight.  Notice how much thrust it has to use and how it slowly tapers off as time passes. It is interesting to compare this to the slingshot maneuvers above and below where after the slingshot is complete the spacecraft requires very little thrust and adjustment to its trajectory.
 
-## A successful slingshot maneuver with control
+## Slingshot off of Jupiter
 
 <video width="640" height="640" controls>
 <source src="https://github.com/samcochran/Gravitational-Slingshot/raw/master/Animations/control_attempt_4.mp4" type="video/mp4">
