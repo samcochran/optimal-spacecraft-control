@@ -6,6 +6,6 @@ We explore the effects of various different masses and initial conditions.  The 
 
 To see our code for simulating and plotting gravitational dynamics, see the code folder, specifically [simulation.py](https://github.com/samcochran/optimal-spacecraft-control/blob/master/Code/simulation.py) and [plotting.py](https://github.com/samcochran/optimal-spacecraft-control/blob/master/Code/plotting.py). Our code for solving the optimal control problem is given in [control.py](https://github.com/samcochran/optimal-spacecraft-control/blob/master/Code/control.py).
 
-[Check out our latest animations](https://samcochran.github.io/optimal-spacecraft-control/) on the optimal control problem.
+[Check out our latest animations](https://samco7.github.io/optimal-spacecraft-control/) on the optimal control problem.
 
-[View our previous animations](https://samcochran.github.io/optimal-spacecraft-control/nbody_slingshot.html) of the nbody problem and slingshots
+[View our previous animations](https://samco7.github.io/optimal-spacecraft-control/nbody_slingshot.html) of the nbody problem and slingshots
